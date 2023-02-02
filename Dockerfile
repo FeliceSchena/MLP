@@ -7,7 +7,6 @@ COPY ./requirements.txt /requirements.txt
 COPY ./src /src
 COPY ./datasets /datasets
 WORKDIR /src
-RUN --mount=type=cache,target=/root/.cache \
-     pip install  -r /requirements.txt
+RUN  pip install  -r /requirements.txt
 CMD ["python", "webserver.py"]
 EXPOSE 8080
