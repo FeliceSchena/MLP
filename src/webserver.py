@@ -82,19 +82,21 @@ def post_problem(serial_n, methods=['POST']):
 
 @app.route('/create_device', methods=['POST'])
 def create_device():
-    data=request.get_json()
-    assert data is not None
-    assert data['username'] is not None
-    assert data['password'] is not None
-    assert data['asset_name'] is not None
-    assert data['imu_name'] is not None
-    assert data['gps_name'] is not None
-    assert data['co2_name'] is not None
-    ret,code=create_device(data['asset_name'],data['imu_name'],data['gps_name'],data['co2_name'])
-    if code==500:
-        return {'message': "Request must be JSON"}, 500
-    else:
-        return {'message': "Done"}, 201
+    if request.is_json:
+        data=request.get_json()
+        assert data is not None
+        assert data['username'] is not None
+        assert data['password'] is not None
+        assert data['asset_name'] is not None
+        assert data['imu_name'] is not None
+        assert data['gps_name'] is not None
+        assert data['co2_name'] is not None
+        ret,code=create_device(data['asset_name'],data['imu_name'],data['gps_name'],data['co2_name'])
+        if code==500:
+            return {'message': "Request must be JSON"}, 500
+        else:
+            return {'message': "Done"}, 201
+    return {'message': "Request must be JSON"}, 415
     
 
 
