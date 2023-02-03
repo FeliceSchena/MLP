@@ -36,6 +36,16 @@ def internal_error(error):
 def post_problem(serial_n, methods=['POST']):
     if request.is_json:
         data = request.get_json()
+        latitudes = data.pop('Lat')
+        longitudes = data.pop('Lon')
+        speeds = data.pop('Speed')
+        co2 = data.pop('Co2')
+        AccX = data.['AccX']
+        AccY = data.['AccY']
+        AccZ = data.['AccZ']
+        GyroX = data.['GyroX']
+        GyroY = data.['GyroY']
+        GyroZ = data.['GyroZ']
         model=torch.load('model.pt')
         model.eval()
         model=model.to(device)
@@ -43,13 +53,21 @@ def post_problem(serial_n, methods=['POST']):
         ret=ret.to(device)
         pred=torch.argmax(predict(model,ret))
         if pred.item()==0:
+            pred=str("Normal")
             phrase = open('normal.txt').readlines()[np.random.randint(0, num_lines_normal)]
         elif pred.item()==1:
+            pred=str("Aggressive")
             phrase = open('aggressive.txt').readlines()[np.random.randint(0, num_lines_aggressive)]
         else:
+            pred=str("Slow")
             phrase = open('slow.txt').readlines()[np.random.randint(0, num_lines_slow)]
+        url = 'https://iot.ing.unimore.it/'+str(serial_n)+str("/telemetry")
+        data = {'Lat': latitudes, 'Lon': longitudes, 'Speed': speeds, 'AccX': AccX, 'AccY': AccY, 'AccZ': AccZ, 'GyroX': GyroX, 'GyroY': GyroY, 'GyroZ': GyroZ, 'Co2': co2, 'DrivingStyle': pred.item()'}
+        headers = {'Content-type': 'application/json'}
+        r = requests.post(url, data=json.dumps(data), headers=headers)
         return jsonify(id=serial_n,pred=pred.item(),frase=phrase), 201
     return {'message': "Request must be JSON"}, 415
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
