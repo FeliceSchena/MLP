@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from main import predict
+from tb_api import create_device
 import torch
 import torch.nn as nn
 import torch.utils.data as data_utils
@@ -7,7 +8,8 @@ import numpy as np
 import sys
 import os
 from pathlib import Path
-
+import requests
+import json
 
 
 appname = "Driving Style Prediction"
@@ -61,12 +63,28 @@ def post_problem(serial_n, methods=['POST']):
         else:
             pred_str=str("Slow")
             phrase = open('slow.txt').readlines()[np.random.randint(0, num_lines_slow)]
-        url = 'https://iot.ing.unimore.it/'+str(serial_n)+str('/telemetry')
+        url = 'https://iot.ing.unimore.it/api/v1/'+str(serial_n)+str('/telemetry')
         data = {'Lat': latitudes, 'Lon': longitudes, 'Speed': speeds, 'AccX': AccX, 'AccY': AccY, 'AccZ': AccZ, 'GyroX': GyroX, 'GyroY': GyroY, 'GyroZ': GyroZ, 'Co2': co2, 'DrivingStyle': pred.item()}
         headers = {'Content-type': 'application/json'}
-        r = request.post(url, data=json.dumps(data), headers=headers)
-        return jsonify(id=serial_n,pred=pred_str,frase=phrase), 201
+        r = requests.post(url, data=json.dumps(data), headers=headers,verify=False)
+        return jsonify(id=serial_n,pred=pred_str,frase=phrase), 201,r
     return {'message': "Request must be JSON"}, 415
+
+
+@app.route('/create_device', methods=['POST'])
+def create_device():
+    data=request.get_json()
+    assert data['asset_name'] is not None
+    assert data['imu_name'] is not None
+    assert data['gps_name'] is not None
+    assert data['co2_name'] is not None
+    ret,code=create_device(data['asset_name'],data['imu_name'],data['gps_name'],data['co2_name'])
+    if code==500:
+        return {'message': "Request must be JSON"}, 500
+    else:
+        return {'message': "Done"}, 201
+    
+
 
 
 if __name__ == '__main__':
