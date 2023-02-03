@@ -63,11 +63,20 @@ def post_problem(serial_n, methods=['POST']):
         else:
             pred_str=str("Slow")
             phrase = open('slow.txt').readlines()[np.random.randint(0, num_lines_slow)]
-        url = 'https://iot.ing.unimore.it/api/v1/'+str(serial_n)+str('/telemetry')
-        data = {'Lat': latitudes, 'Lon': longitudes, 'Speed': speeds, 'AccX': AccX, 'AccY': AccY, 'AccZ': AccZ, 'GyroX': GyroX, 'GyroY': GyroY, 'GyroZ': GyroZ, 'Co2': co2, 'DrivingStyle': pred.item()}
+        url = 'https://iot.ing.unimore.it/api/v1/'+str('gps_')+str(serial_n)+str('/telemetry')
+        url1 = 'https://iot.ing.unimore.it/api/v1/'+str('imu_')+str(serial_n)+str('/telemetry')
+        url2 = 'https://iot.ing.unimore.it/api/v1/'+str('co2_')+str(serial_n)+str('/telemetry')
+        url3 = 'https://iot.ing.unimore.it/api/v1/'+str('drivingstyle_')+str(serial_n)+str('/telemetry')
+        data = {'Lat': latitudes, 'Lon': longitudes, 'Speed': speeds} 
+        data1= {'AccX': AccX, 'AccY': AccY, 'AccZ': AccZ, 'GyroX': GyroX, 'GyroY': GyroY, 'GyroZ': GyroZ}
+        data2= {'Co2': co2}
+        data3= {'DrivingStyle': pred.item()}
         headers = {'Content-type': 'application/json'}
         r = requests.post(url, data=json.dumps(data), headers=headers,verify=False)
-        return jsonify(id=serial_n,pred=pred_str,frase=phrase), 201,r
+        r = requests.post(url1, data=json.dumps(data1), headers=headers,verify=False)
+        r = requests.post(url2, data=json.dumps(data2), headers=headers,verify=False)
+        r = requests.post(url3, data=json.dumps(data3), headers=headers,verify=False)
+        return jsonify(id=serial_n,pred=pred_str,frase=phrase), 201
     return {'message': "Request must be JSON"}, 415
 
 
