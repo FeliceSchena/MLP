@@ -64,7 +64,7 @@ def post_problem(serial_n, methods=['POST']):
         url = 'https://iot.ing.unimore.it/'+str(serial_n)+str('/telemetry')
         data = {'Lat': latitudes, 'Lon': longitudes, 'Speed': speeds, 'AccX': AccX, 'AccY': AccY, 'AccZ': AccZ, 'GyroX': GyroX, 'GyroY': GyroY, 'GyroZ': GyroZ, 'Co2': co2, 'DrivingStyle': pred.item()}
         headers = {'Content-type': 'application/json'}
-        r = requests.post(url, data=json.dumps(data), headers=headers)
+        r = request.post(url, data=json.dumps(data), headers=headers)
         return jsonify(id=serial_n,pred=pred_str,frase=phrase), 201
     return {'message': "Request must be JSON"}, 415
 
