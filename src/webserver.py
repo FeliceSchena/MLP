@@ -38,10 +38,18 @@ def internal_error(error):
 def post_problem(serial_n, methods=['POST']):
     if request.is_json:
         data = request.get_json()
+        assert data['gps_id'] is not None
+        assert data['imu_id'] is not None
+        assert data['co2_id'] is not None
+        assert data['predict_id'] is not None
         latitudes = data.pop('Lat')
         longitudes = data.pop('Lon')
         speeds = data.pop('Speed')
         co2 = data.pop('Co2')
+        gps_id = data.pop('gps_id')
+        imu_id = data.pop('imu_id')
+        co2_id = data.pop('co2_id')
+        predict_id = data.pop('predict_id')
         AccX = data['AccX']
         AccY = data['AccY']
         AccZ = data['AccZ']
@@ -63,10 +71,10 @@ def post_problem(serial_n, methods=['POST']):
         else:
             pred_str=str("Slow")
             phrase = open('slow.txt').readlines()[np.random.randint(0, num_lines_slow)]
-        url = 'https://iot.ing.unimore.it/api/v1/'+str('gps_')+str(serial_n)+str('/telemetry')
-        url1 = 'https://iot.ing.unimore.it/api/v1/'+str('imu_')+str(serial_n)+str('/telemetry')
-        url2 = 'https://iot.ing.unimore.it/api/v1/'+str('co2_')+str(serial_n)+str('/telemetry')
-        url3 = 'https://iot.ing.unimore.it/api/v1/'+str('drivingstyle_')+str(serial_n)+str('/telemetry')
+        url = 'https://iot.ing.unimore.it/api/v1/'+str(gps_id)+str('/telemetry')
+        url1 = 'https://iot.ing.unimore.it/api/v1/'+str(imu_id)+str('/telemetry')
+        url2 = 'https://iot.ing.unimore.it/api/v1/'+str(co2_id)+str('/telemetry')
+        url3 = 'https://iot.ing.unimore.it/api/v1/'+str(predict_id)+str('/telemetry')
         data = {'Lat': latitudes, 'Lon': longitudes, 'Speed': speeds} 
         data1= {'AccX': AccX, 'AccY': AccY, 'AccZ': AccZ, 'GyroX': GyroX, 'GyroY': GyroY, 'GyroZ': GyroZ}
         data2= {'Co2': co2}
@@ -95,7 +103,7 @@ def create_device():
         if code==500:
             return {'message': "Request must be JSON"}, 500
         else:
-            return {'message': "Done"}, 201
+            return ret, 201
     return {'message': "Request must be JSON"}, 415
     
 

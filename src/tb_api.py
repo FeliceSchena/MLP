@@ -3,6 +3,7 @@ import logging
 from tb_rest_client.rest_client_ce import *
 # Importing the API exception
 from tb_rest_client.rest import ApiException
+import json
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -10,11 +11,14 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 url = "https://iot.ing.unimore.it/"
 # Default Tenant Administrator credentials
-def create_device(username,password,asset_name, imu_name,gps_name,co2_name):
+def create_device(username,customer_name,password,asset_name, imu_name,gps_name,co2_name):
     with RestClientCE(base_url=url) as rest_client:
         try:
             # Auth with credentials
             rest_client.login(username=username, password=password)
+            customer1 = Customer(title=customer_name)
+            customer1 = rest_client.save_customer(customer1)
+
 
             # Creating an Asset
             asset = Asset(name=asset_name, type="IoT Device")
@@ -41,5 +45,6 @@ def create_device(username,password,asset_name, imu_name,gps_name,co2_name):
             relation2 = rest_client.save_relation(relation2)
 
             logging.info(" Relation was created:\n%r\n", relation)
+            return json.dumps({"asset_id":asset.id,"device_id":device.id,"device_id1":device1.id,"device_id2":device2.id,"customer_id":customer1.id})
         except ApiException as e:
             return "Error 500",500
