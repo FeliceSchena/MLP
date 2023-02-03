@@ -74,6 +74,9 @@ def post_problem(serial_n, methods=['POST']):
 @app.route('/create_device', methods=['POST'])
 def create_device():
     data=request.get_json()
+    assert data is not None
+    assert data['username'] is not None
+    assert data['password'] is not None
     assert data['asset_name'] is not None
     assert data['imu_name'] is not None
     assert data['gps_name'] is not None

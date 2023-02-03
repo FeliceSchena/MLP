@@ -10,9 +10,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 url = "https://iot.ing.unimore.it/"
 # Default Tenant Administrator credentials
-username = "246240@studenti.unimore.it"
-password = "M2KEr#*ODHK5L%3$r7sm"
-def create_device(asset_name, imu_name,gps_name,co2_name):
+def create_device(username,password,asset_name, imu_name,gps_name,co2_name):
     with RestClientCE(base_url=url) as rest_client:
         try:
             # Auth with credentials
