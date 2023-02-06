@@ -1,50 +1,26 @@
-import logging
-# Importing models and REST client class from Community Edition version
-from tb_rest_client.rest_client_ce import *
-# Importing the API exception
-from tb_rest_client.rest import ApiException
+import dash
+import device
+import customer
+import user
 import json
+def create_all(username,tenant_user_email,tenant_user_password):
+    deviceName = 'device_'+str(hash(user_name))
+    user_name = username
+    customerName = 'customer_'+str(hash(user_name))
+    tenant_user=tenant_user_email
+    tenant_password=tenant_user_password
+    try:
 
+        # 1) creating device; 1b) retrieving id and access token
+        deviceId, accesstoken = device.createDevice(deviceName,tenant_user=tenant_user,tenant_password=tenant_password)
+        # 2) creating dashboard
+        dashboard_id,dashboard_state = dash.createDashboard(deviceId,tenant_user=tenant_user,tenant_password=tenant_password)
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(levelname)s - %(module)s - %(lineno)d - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-url = "https://iot.ing.unimore.it/"
-# Default Tenant Administrator credentials
-def create_device(username,customer_name,password,asset_name, imu_name,gps_name,co2_name):
-    with RestClientCE(base_url=url) as rest_client:
-        try:
-            # Auth with credentials
-            rest_client.login(username=username, password=password)
-            customer1 = Customer(title=customer_name)
-            customer1 = rest_client.save_customer(customer1)
+        # 3) Create a customer
+        customer,customer_state = customer.createCustomer(customerName,deviceId,user_name,tenant_user=tenant_user,tenant_password=tenant_password,dashboard_id=dashboard_id)
 
-
-            # Creating an Asset
-            asset = Asset(name=asset_name, type="IoT Device")
-            asset = rest_client.save_asset(asset)
-
-            logging.info("Asset was created:\n%r\n", asset)
-
-            # creating a Device
-            device = Device(name=imu_name, type="Imu")
-            device = rest_client.save_device(device)
-            device1 = Device(name=gps_name, type="Gps")
-            device1 = rest_client.save_device(device1)
-            device2 = Device(name=co2_name, type="Co2")
-            device2 = rest_client.save_device(device2)
-
-            logging.info(" Devices was created:\n%r, %r, %r\n", device,device1,device2)
-
-            # Creating relations from device to asset
-            relation = EntityRelation(_from=asset.id, to=device.id, type="Contains")
-            relation1 = EntityRelation(_from=asset.id, to=device1.id, type="Contains")
-            relation2 = EntityRelation(_from=asset.id, to=device2.id, type="Contains")
-            relation = rest_client.save_relation(relation)
-            relation1 = rest_client.save_relation(relation1)
-            relation2 = rest_client.save_relation(relation2)
-
-            logging.info(" Relation was created:\n%r\n", relation)
-            return json.dumps({"asset_id":asset.id,"device_id":device.id,"device_id1":device1.id,"device_id2":device2.id,"customer_id":customer1.id})
-        except ApiException as e:
-            return "Error 500",500
+        # 4) Create a user and assign dashboard to user
+        user,link,user_state = user.createUser(user_name,customer,tenant_user=tenant_user,tenant_password=tenant_password,dashboard_id=dashboard_id)
+        return json.dumps({"access_token":accesstoken,"link":link}),200
+    except:
+        return json.dumps({"error":"error"}),500
