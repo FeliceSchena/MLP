@@ -56,7 +56,7 @@ def post_problem(serial_n, methods=['POST']):
         return jsonify(id=serial_n,pred=pred_str,frase=phrase), 201
     return {'message': "Request must be JSON"}, 415
 
-#def create_device(username,customer_name,password,asset_name, imu_name,gps_name,co2_name):
+
 @app.route('/create_device', methods=['POST'])
 def create_element():
     if request.is_json:
@@ -65,11 +65,11 @@ def create_element():
         assert data['username'] is not None
         assert data['tenant_user_email'] is not None
         assert data['tenant_user_password'] is not None
-        ret,code=create_all(data['username'],data['tenant_user_email'],data['tenant_user_password'])
+        access_token,user_id,code=create_all(data['username'],data['tenant_user_email'],data['tenant_user_password'])
         if code==200:
-            return ret, code
-        elif code==400 or code==401 or code==403 or code==404 or code==409 or code==500:
-            return {"message": "Qualcosa e' andato storto"}, code
+            return jsonify(access_token=access_token,user_id=user_id), code
+        else: 
+            return jsonify(message="Error while creating user"), 500
     return {'message': "Request must be JSON"}, 415
     
 

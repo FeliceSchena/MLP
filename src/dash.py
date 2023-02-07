@@ -4,9 +4,10 @@ from tb_rest_client.rest_client_ce import *
 from tb_rest_client.rest import ApiException
 import json
 import requests
-
+from pathlib import Path
 #TODO return dashboard id, for customer association(?)
 
+script_path = Path(__file__, '..').resolve()
 
 """
 create a json configuration equal to CarLO_dashboard, with alias single entity of the entity id passed as parameter
@@ -15,8 +16,8 @@ devideId: string of the Device Id
 
 return: a json object
 """
-def createConfigDashboard(deviceId):    
-    with open('dashConfiguration.json','r') as f:
+def createConfigDashboard(deviceId): 
+    with open(script_path.joinpath("dashConfiguration.json")) as f:
         config = json.load(f)
         config["title"] = f'CarLO Dashboard of device {deviceId}'
         config["configuration"]["entityAliases"]["f2963f99-ab9b-a327-7e2d-f850c012a580"]["filter"]["singleEntity"]["id"] = deviceId
