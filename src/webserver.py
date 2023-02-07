@@ -9,7 +9,6 @@ import sys
 import os
 from pathlib import Path
 import requests
-import json
 
 
 appname = "Driving Style Prediction"
@@ -46,14 +45,18 @@ def post_problem(serial_n, methods=['POST']):
         pred=torch.argmax(predict(model,ret))
         if pred.item()==0:
             pred_str=str("Normal")
+            r=requests.post(url="https://iot.ing.unimore.it/api/v1/"+str(serial_n)+"/telemetry",headers={"Content-Type":"application/json"},json={"Predict":int(pred.item()+1)})
             phrase = open('normal.txt').readlines()[np.random.randint(0, num_lines_normal)]
         elif pred.item()==1:
             pred_str=str("Aggressive")
+            r=requests.post(url="https://iot.ing.unimore.it/api/v1/"+str(serial_n)+"/telemetry",headers={"Content-Type":"application/json"},json={"Predict":int(pred.item()+1)})
+            print(r.status_code,r.text)
             phrase = open('aggressive.txt').readlines()[np.random.randint(0, num_lines_aggressive)]
         else:
             pred_str=str("Slow")
+            r=requests.post(url="https://iot.ing.unimore.it/api/v1/"+str(serial_n)+"/telemetry",headers={"Content-Type":"application/json"},json={"Predict":int(pred.item()-2)})
             phrase = open('slow.txt').readlines()[np.random.randint(0, num_lines_slow)]
-        return jsonify(id=serial_n,pred=pred_str,frase=phrase), 201
+        return jsonify(id=serial_n,pred=pred_str,frase=phrase,Predict=pred.item()), 201
     return {'message': "Request must be JSON"}, 415
 
 
